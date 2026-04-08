@@ -1,0 +1,16 @@
+{
+  "name": "cariboo/choco",
+  "autoload": {
+    "psr-4": {
+      "Cariboo\\Choco\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Pierre"
+    }
+  ],
+  "require": {
+    "php-di/php-di": "^7.1"
+  }
+}

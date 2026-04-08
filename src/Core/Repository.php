@@ -13,9 +13,9 @@ abstract class Repository
     private function connect(): void
     {
         try {
-            $dsn = "mysql:host=localhost;dbname=Learning;charset=utf8";
-            $username = "root";
-            $password = "";
+            $dsn = "mysql:host={$_ENV["APP_HOST"]};dbname={$_ENV["APP_DATABASE"]};charset=utf8";
+            $username = $_ENV["APP_USERNAME"];
+            $password = $_ENV["APP_PASSWORD"];
 
             $this->pdo = new \PDO($dsn, $username, $password);
             $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);

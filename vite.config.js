@@ -6,5 +6,11 @@ export default defineConfig({
     outDir: "../public/build",
     emptyOutDir: true,
     manifest: true,
+
+    rolldownOptions: {
+      input: {
+        app: "resources/js/app.js",
+      },
+    },
   },
 });

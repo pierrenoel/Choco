@@ -1,6 +1,6 @@
 <?php 
 
-namespace Cariboo\Choco\Controllers;
+namespace Choco\Core;
  
 abstract class Controller
 {
@@ -10,7 +10,7 @@ abstract class Controller
         extract($data, EXTR_SKIP);
 
         // Lire le contenu de la vue
-        $viewFile = __DIR__ . "/../../views/{$view}.choco.html";
+        $viewFile = __DIR__ . "/../../resources/views/{$view}.choco.html";
         $content = file_get_contents($viewFile);
 
           // Transformer les directives
@@ -20,7 +20,8 @@ abstract class Controller
             '/@else/' => '<?php else: ?>',
             '/@endif/' => '<?php endif ?>',
             '/@foreach\s*\((.*?)\)/' => '<?php foreach($1): ?>',
-            '/@endforeach/' => '<?php endforeach; ?>'
+            '/@endforeach/' => '<?php endforeach; ?>',
+            '/@csrf/' => '<input type="hidden" name="csrf" value="<?= $_SESSION["token_csrf"] ?>"/>'
         ];
         
         $content = preg_replace(array_keys($replacements), array_values($replacements), $content);
@@ -38,12 +39,12 @@ abstract class Controller
 
         // Charger le layout et injecter le rendu
         \ob_start();
-        $layoutFile = __DIR__ . "/../../views/" . ($layout ?? "layouts/app") . ".choco.html";
+        $layoutFile = __DIR__ . "/../../resources/views/" . ($layout ?? "layouts/app") . ".choco.html";
         require $layoutFile; 
         return \ob_get_clean();
     }
 
-    public function redirect(string $url, int $status)
+    public function redirect(string $url, int $status = 200)
     {
         \http_response_code($status);
         header("location: {$url}");

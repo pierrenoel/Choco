@@ -1,6 +1,7 @@
 <?php 
 
-namespace Cariboo\Choco\Repositories;
+namespace Choco\Repositories;
+use Choco\Core\Repository;
 
 class UserRepository extends Repository
 {

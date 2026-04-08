@@ -1,7 +1,8 @@
 <?php 
 
-namespace Cariboo\Choco\Controllers;
-use Cariboo\Choco\Repositories\UserRepository;
+namespace Choco\Controllers;
+use Choco\Core\Controller;
+use Choco\Repositories\UserRepository;
 
 class HomeController extends Controller
 {

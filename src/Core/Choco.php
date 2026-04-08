@@ -1,6 +1,6 @@
 <?php 
 
-namespace Cariboo\Choco\Controllers;
+namespace Choco\Core;
 
 class Choco 
 {

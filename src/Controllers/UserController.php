@@ -1,7 +1,8 @@
 <?php 
 
-namespace Cariboo\Choco\Controllers;
-use Cariboo\Choco\Repositories\UserRepository;
+namespace Choco\Controllers;
+use Choco\Core\Controller;
+use Choco\Repositories\UserRepository;
 
 class UserController extends Controller
 {
@@ -20,5 +21,22 @@ class UserController extends Controller
             "title" => "Profile de {$user["name"]}",
             "user" => $user,            
         ]);
+    }
+
+    public function create() 
+    {
+        echo $this->view("user/create",[
+            "title" => "Nouvel utilisateur"
+        ]);
+    }
+
+    public function store(array $request)
+    {
+        $csrf = $request["csrf"];
+        if($_SESSION["token_csrf"] !== $csrf) $this->redirect("/not-found",404);
+
+        $this->userRepository->create($request);
+
+        $this->redirect("/");
     }
 }

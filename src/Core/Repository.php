@@ -1,6 +1,6 @@
 <?php 
 
-namespace Cariboo\Choco\Repositories;
+namespace Choco\Core;
 
 abstract class Repository 
 {
@@ -72,7 +72,8 @@ abstract class Repository
     public function create(array $array) 
     {
         if(empty($array)) throw new \InvalidArgumentException("Data cannot be empty");
-
+        
+        unset($array["csrf"]);
         $keys = \array_keys($array);
         $explodedKeys = implode(",",$keys);
         $explodeKeysWithDoubleDots = implode(",",array_map(fn($item) => ":{$item}",$keys));
@@ -84,6 +85,5 @@ abstract class Repository
         $stmt->execute($array);
 
         return $this->pdo->lastInsertId();
-
     }
 }

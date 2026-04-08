@@ -1,6 +1,7 @@
 <?php 
 
-namespace Cariboo\Choco\Controllers;
+namespace Choco\Controllers;
+use Choco\Core\Controller;
 
 class PostController extends Controller
 {

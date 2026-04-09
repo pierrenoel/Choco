@@ -11,7 +11,8 @@ use Choco\Core\Router;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-// Console
+// If faut ici générer le code csrf
+if(!isset($_SESSION["token_csrf"])) $_SESSION["token_csrf"] = bin2hex(random_bytes(5)); 
 
 // Routes
 $router = new Router();

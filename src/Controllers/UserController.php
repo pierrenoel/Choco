@@ -30,13 +30,19 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(array $request)
+    public function store(array $post)
     {
-        $csrf = $request["csrf"];
-        if($_SESSION["token_csrf"] !== $csrf) $this->redirect("/not-found",404);
+        $this->csrf();
 
-        $this->userRepository->create($request);
+        // if($_SERVER["REQUEST_METHOD"] != "POST") redirect("/not-found",402);
 
-        $this->redirect("/");
+        $this->userRepository->create($post);
+
+        redirect("/");
+    }
+
+    public function delete(int $id)
+    {
+
     }
 }

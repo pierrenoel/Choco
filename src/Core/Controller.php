@@ -44,9 +44,8 @@ abstract class Controller
         return \ob_get_clean();
     }
 
-    public function redirect(string $url, int $status = 200)
+    public function csrf()
     {
-        \http_response_code($status);
-        header("location: {$url}");
+        if($_SESSION["token_csrf"] !== $_POST["csrf"]) $this->redirect("/not-found",404);
     }
 }

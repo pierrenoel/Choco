@@ -16,3 +16,9 @@ function vite($entry)
 
     return '/build/' . $manifest[$entry]['file'];
 }
+
+function redirect(string $url, int $status = 200)
+{
+    http_response_code($status);
+    header("location: {$url}");
+}

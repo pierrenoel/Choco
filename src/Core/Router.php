@@ -29,11 +29,14 @@ class Router
       $requestPath = \trim($this->url["path"], "/");
 
         foreach ($this->routes as $route) {
+
+            // if($this->request_method !== $route["method"]) redirect("/not-found",402);
+        
             if ($route['method'] === $this->request_method && \preg_match($route['pattern'], $requestPath, $matches)) {
                               
                 $urlParams = \array_slice($matches, 1); 
 
-                $params = [...$urlParams,$_POST];
+                $params = [...$urlParams,$_POST, $_GET];
                 
                 $controller = new $route['controller']();
                 $action = $route['action'];
@@ -68,5 +71,10 @@ class Router
     public function get(string $url, array $controller) 
     {
         $this->addToRoutes($url,$controller,"GET");
+    }
+
+    public function delete(string $url, array $controller) 
+    {
+        $this->addToRoutes($url,$controller,"POST");
     }
 }

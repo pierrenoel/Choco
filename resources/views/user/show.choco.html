@@ -1,2 +1,12 @@
 <h1>{{ $user["name"] }}</h1>
 <p>{{ $user["email"] }}</p>
+
+<form method="POST" action="/user/delete/{{ $user["id"] }}">
+    @csrf
+    @delete
+    <div>
+        <input type="submit" value="Supprimer" />
+    </div>
+</form>
+
+<a href="/user/edit/{{ $user["id"] }}">Editer</a>

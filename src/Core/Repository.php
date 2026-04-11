@@ -69,21 +69,55 @@ abstract class Repository
         }
     }
 
-    public function create(array $array) 
-    {
-        if(empty($array)) throw new \InvalidArgumentException("Data cannot be empty");
-        
-        unset($array["csrf"]);
+    public function create(array $array) : mixed
+    {        
         $keys = \array_keys($array);
         $explodedKeys = implode(",",$keys);
         $explodeKeysWithDoubleDots = implode(",",array_map(fn($item) => ":{$item}",$keys));
 
-        $sql = "INSERT INTO {$this->getTableName()} ({$explodedKeys}) VALUES ({$explodeKeysWithDoubleDots})";
+        try{
+            $sql = "INSERT INTO {$this->getTableName()} ({$explodedKeys}) VALUES ({$explodeKeysWithDoubleDots})";
 
-        $stmt = $this->pdo->prepare($sql);
+            $stmt = $this->pdo->prepare($sql);
 
-        $stmt->execute($array);
+            $stmt->execute($array);
 
-        return $this->pdo->lastInsertId();
+            return $this->pdo->lastInsertId();
+        }catch(\PDOException $e){
+            echo "Error {$e->getMessage()}";
+            return false;
+        }
+    }
+
+    public function update(array $array, int $id) 
+    {
+        $keys = \array_keys($array);
+        $KeysUpdated = implode(",",array_map(fn($item) => "{$item}=?",$keys));
+        $values = implode(",",\array_values($array));
+
+        try{
+            $sql = "UPDATE {$this->getTableName()} SET {$KeysUpdated} WHERE id = {$id}";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute(explode(",",$values));
+        }catch(\PDOException $e){
+            echo "Error {$e->getMessage()}";
+            return false;
+        }
+    }
+
+    public function delete(int $id) : bool
+    {
+        $result = $this->find($id);
+        if(!$result) throw new \Exception("Record with id {$id} not found");
+
+        try{
+            $stmt = $this->pdo->prepare("DELETE FROM {$this->getTableName()} WHERE id = :id");
+            $stmt->execute(["id" => $id]);
+            return true;
+        }
+        catch(\PDOException $e){
+            echo "Error {$e->getMessage()}";
+            return false;
+        }
     }
 }

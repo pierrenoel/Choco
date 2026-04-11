@@ -3,6 +3,7 @@
 namespace Choco\Controllers;
 use Choco\Core\Controller;
 use Choco\Repositories\UserRepository;
+use Choco\Core\Request;
 
 class UserController extends Controller
 {
@@ -12,9 +13,10 @@ class UserController extends Controller
         $this->userRepository = new UserRepository();
     }
 
-    public function show(int $id)
-    {
-       $user = $this->userRepository->find($id);
+    public function show(Request $request)
+    {   
+        $id = $request->param(0);
+        $user = $this->userRepository->find($id);
 
         echo $this->view("user/show",
         [
@@ -30,19 +32,50 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(array $post)
+    public function store(Request $request)
     {
         $this->csrf();
 
-        // if($_SERVER["REQUEST_METHOD"] != "POST") redirect("/not-found",402);
-
-        $this->userRepository->create($post);
+        $this->userRepository->create([
+            "name" => $request->post("name"),
+            "email" => $request->post("email")
+        ]);
 
         redirect("/");
     }
 
-    public function delete(int $id)
+    public function edit(Request $request)
     {
+        $id = $request->param(0);
+        $user = $this->userRepository->find($id);
 
+        echo $this->view("user/edit",[
+            "title" => "Edit user",
+            "user" => $user
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $this->csrf();
+
+        $id = $request->param(0);
+        $name = $request->post("name");
+        $email = $request->post("email");
+
+        $this->userRepository->update([
+            "name" => $name,
+            "email" => $email
+        ],$id);
+
+        redirect("/");
+    }
+
+    public function delete(Request $request)
+    {
+        $id = $request->param(0);
+        $this->userRepository->delete($id);
+
+        redirect("/");
     }
 }

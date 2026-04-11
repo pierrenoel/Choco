@@ -1,0 +1,18 @@
+<h1>
+  Editer un utilisateur
+  <h1></h1>
+</h1>
+
+<form method="POST" action="/user/edit/{{$user['id']}}">
+  @csrf 
+  @put
+  <div>
+    <input type="text" value="{{$user['name']}}" name="name" />
+  </div>
+  <div>
+    <input type="email" value="{{$user['email']}}" name="email" />
+  </div>
+  <div>
+    <input type="submit" value="Editer" />
+  </div>
+</form>

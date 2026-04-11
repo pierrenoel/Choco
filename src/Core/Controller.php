@@ -21,7 +21,9 @@ abstract class Controller
             '/@endif/' => '<?php endif ?>',
             '/@foreach\s*\((.*?)\)/' => '<?php foreach($1): ?>',
             '/@endforeach/' => '<?php endforeach; ?>',
-            '/@csrf/' => '<input type="hidden" name="csrf" value="<?= $_SESSION["token_csrf"] ?>"/>'
+            '/@csrf/' => '<input type="hidden" name="csrf" value="<?= $_SESSION["token_csrf"] ?>"/>',
+            '/@delete/' =>'<input type="hidden" name="_method" value="DELETE" />', 
+            '/@put/' =>'<input type="hidden" name="_method" value="PUT" />' 
         ];
         
         $content = preg_replace(array_keys($replacements), array_values($replacements), $content);

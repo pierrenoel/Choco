@@ -10,4 +10,5 @@ class UserRepository extends Repository
     }
 
     protected $table = "users";
+
 }

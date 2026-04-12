@@ -4,6 +4,7 @@ namespace Choco\Controllers;
 use Choco\Core\Controller;
 use Choco\Repositories\UserRepository;
 use Choco\Core\Request;
+use Choco\Entities\User;
 
 class UserController extends Controller
 {
@@ -36,9 +37,14 @@ class UserController extends Controller
     {
         $this->csrf();
 
+        $user = new User();
+        
+        $user->setName($request->post("name"));
+        $user->setMail($request->post("email"));
+
         $this->userRepository->create([
-            "name" => $request->post("name"),
-            "email" => $request->post("email")
+            "name" => $user->getName(),
+            "email" => $user->getMail()
         ]);
 
         redirect("/");

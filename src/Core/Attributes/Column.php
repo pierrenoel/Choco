@@ -3,13 +3,15 @@
 namespace Choco\Core\Attributes;
 use Attribute;
 
-#[Attribute]
+#[Attribute(Attribute::TARGET_PROPERTY)]
 class Column 
 {
     public function __construct(
         public string $type,
-        public int $length,
-        public bool $nullable
+        public ?int $length = null,
+        public bool $nullable = false,
+        public mixed $default = null,
+        public bool $unique = false,
+        public ?string $name = null, //
     ){}
-
 }

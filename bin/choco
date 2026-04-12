@@ -8,5 +8,6 @@ $app = new Application('ChocoPHP CLI', '1.0.0');
 
 $app->add(new Choco\Console\ServeCommand());
 $app->add(new Choco\Console\ControllerCommand());
+$app->add(new Choco\Console\MigrationCommand());
 
 $app->run();

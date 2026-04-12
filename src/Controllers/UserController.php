@@ -38,7 +38,7 @@ class UserController extends Controller
         $this->csrf();
 
         $user = new User();
-        
+
         $user->setName($request->post("name"));
         $user->setMail($request->post("email"));
 
@@ -66,12 +66,15 @@ class UserController extends Controller
         $this->csrf();
 
         $id = $request->param(0);
-        $name = $request->post("name");
-        $email = $request->post("email");
+
+        $user = new User();
+
+        $user->setName($request->post("name"));
+        $user->setMail($request->post("email"));
 
         $this->userRepository->update([
-            "name" => $name,
-            "email" => $email
+            "name" => $user->getName(),
+            "email" => $user->getMail()
         ],$id);
 
         redirect("/");

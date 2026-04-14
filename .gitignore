@@ -1,3 +1,4 @@
+/migrations/database.sql
 /node_modules
 /vendor
 .env

@@ -1,10 +1,12 @@
 <?php 
 
 namespace Choco\Entities;
+use Choco\Core\Attributes\AutoIncrement;
 use Choco\Core\Attributes\Column;
 use Choco\Core\Attributes\Id;
-use Choco\Core\Attributes\AutoIncrement;
+use Choco\Core\Attributes\Table;
 
+#[Table('posts')]
 class Post 
 {
     #[Column(type: 'int')]
@@ -12,7 +14,7 @@ class Post
     #[AutoIncrement()]
     protected int $id;
 
-   #[Column(type: 'string', length: 50, nullable: false)]
+   #[Column(type: 'varchar', length: 50, nullable: false)]
     protected string $title;
 
     public function getTitle() : string

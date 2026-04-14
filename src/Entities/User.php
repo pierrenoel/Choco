@@ -4,7 +4,9 @@ namespace Choco\Entities;
 use Choco\Core\Attributes\Column;
 use Choco\Core\Attributes\Id;
 use Choco\Core\Attributes\AutoIncrement;
+use Choco\Core\Attributes\Table;
 
+#[Table('users')]
 class User 
 {
     #[Column(type: 'int')]
@@ -12,10 +14,10 @@ class User
     #[AutoIncrement()]
     protected int $id;
 
-    #[Column(type: 'string', length: 50, nullable: false)]
+    #[Column(type: 'varchar', length: 50, nullable: false)]
     protected string $name;
 
-    #[Column(type: 'string', length: 100, nullable: false, unique:true)]
+    #[Column(type: 'varchar', length: 100, nullable: false, unique:true)]
     protected string $mail;
 
     public function getName() : string

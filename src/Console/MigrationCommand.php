@@ -2,6 +2,7 @@
 
 namespace Choco\Console;
 
+use Choco\Core\Repositories\BaseRepository;
 use Choco\Core\Services\MigrationService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -61,13 +62,20 @@ class MigrationCommand extends Command
         $entities = $this->readEntities();
         $sql = $this->generateSQL($entities);
 
-        $path = __DIR__ . "/../migrations";
+        $root = dirname(__DIR__, 2);
+        $path = $root . "/migrations/database.sql";
 
-        dd($path);
-
-        // Ecrire dans un fichier de migrations
-        // Pour chaque ligne du tableau, il faut créer un fichier
-
+        if(\file_exists($path)){
+            $io->error("This file already exsits");
+            return Command::FAILURE;
+        }
+        
+        $file = \file_put_contents($path,implode("\n\n",$sql));
+    
+        // Executer le fichier sql
+        $baseRespository = new BaseRepository();
+        $baseRespository->generateDatabase(explode("\n\n",\file_get_contents($path)));
+        
         return Command::SUCCESS;
     }
 }

@@ -5,10 +5,12 @@ namespace Choco\Core\Services;
 use Choco\Core\Attributes\AutoIncrement;
 use Choco\Core\Attributes\Column;
 use Choco\Core\Attributes\Id;
+use Choco\Core\Attributes\Table;
 
 class MigrationService
 {
     protected array $result;
+    protected string $tableName;
 
     public function __construct(
         public $entity
@@ -17,6 +19,16 @@ class MigrationService
     public function getAttributes()
     {
         $reflection = new \ReflectionClass($this->entity);
+
+        // Get the table attribute
+        $tableAttributes = $reflection->getAttributes(Table::class);
+        $this->tableName = strtolower($reflection->getShortName());
+
+        if (!empty($tableAttributes)) {
+            $table = $tableAttributes[0]->newInstance();
+            $this->tableName = $table->name;
+        }
+
         $properties = $reflection->getProperties();
 
         foreach($properties as $property){
@@ -39,7 +51,7 @@ class MigrationService
                     "nullable" => $field->nullable,
                     "default" => $field->default,
                     "unique" => $field->unique,
-                    "name" => $field->name
+                    "name" => $field->name,
                 ];
             }
 
@@ -54,7 +66,6 @@ class MigrationService
             foreach ($autoIncrement as $item) {
                 $this->result[$name]["autoIncrement"] = true;
             }
-
         }
 
         return $this->result;
@@ -64,7 +75,7 @@ class MigrationService
     {
         $attributes = $this->getAttributes();
 
-        $sql = "CREATE TABLE IF NOT EXISTS " . strtolower((new \ReflectionClass($this->entity))->getShortName()) . " (";
+        $sql = "CREATE TABLE IF NOT EXISTS " . $this->tableName . " (";
 
         foreach($attributes as $name => $attribute){
             $sql .= $name . " " . strtoupper($attribute["type"]);

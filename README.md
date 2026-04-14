@@ -11,6 +11,7 @@
 
 ```text
 choco-framework/
+|-  migrations/         # SQL Files
 ├── bin/                # CLI Executable (choco)
 ├── database/           # Migrations and Seeds
 ├── public/             # Document Root (index.php, compiled assets)
@@ -39,18 +40,52 @@ choco-framework/
 
 ## 🧩 Core Components
 
-- `src/Core/Router.php` — routes requests and resolves controllers/actions
-- `src/Core/Controller.php` — renders views and handles layout injection
-- `src/Core/Repository.php` — connects to the database and provides `all()`, `find()`, and `create()` methods
-- `src/helpers.php` — global helper functions for app-level utilities
+- `src/Core/Attributes` — contains attributes for entities.
+- `src/Services` — contains application services.
+- `src/App` — contains the main application files.
+
+- `src/Core/Controller.php` — handles controllers, view rendering, and layout injection.
+- `src/Core/Repository.php` — handles data access and provides all(), find(), and create() methods.
+- `src/Core/Request.php` — handles HTTP requests (method, URI, parameters, etc.).
+- `src/Core/Router.php` — handles routing and resolves controllers/actions.
+
+- `src/helpers.php` — contains global utility helper functions for the application.
 
 ## 🧰 CLI Commands
 
 The project includes custom CLI commands under `src/Console`.
 
-- `php bin/choco list` — show all available commands
-- `php bin/choco choco:hello` — verify the CLI and print a welcome message
-- `php bin/choco serve` — run the built-in PHP development server
-  - optional flag: `--port` or `-p` to change the port (default: `8000`)
-- `php bin/choco make:controller` — create a new controller interactively
-  - optional flag: `--model` or `-m` to also create a related repository model
+### Options
+
+- `-h, --help` — Display help for a given command. If no command is specified, shows the list command help.
+- `--silent` — Do not output any messages.
+- `-q, --quiet` — Only display errors; suppress all other output.
+- `-V, --version` — Display the application version.
+- `--ansi | --no-ansi` — Force or disable ANSI output.
+- `-n, --no-interaction` — Disable interactive prompts.
+- `-v | -vv | -vvv, --verbose` — Increase verbosity (1 = normal, 2 = verbose, 3 = debug).
+
+---
+
+## 📦 Available Commands
+
+- `completion` — Dump the shell completion script.
+- `help` — Display help for a command.
+- `list` — List all available commands.
+- `serve` — Start the ChocoPHP development server.
+
+### `make` commands
+
+- `make:controller` — Create a new controller.
+- `make:migration` — Run a migration.
+
+---
+
+## ⚙️ Usage Examples
+
+- `php bin/choco list` — Show all available commands.
+- `php bin/choco choco:hello` — Verify the CLI and print a welcome message.
+- `php bin/choco serve` — Start the built-in PHP development server.
+  - Optional: `--port` or `-p` to change the port (default: `8000`).
+- `php bin/choco make:controller` — Create a new controller interactively.
+  - Optional: `--model` or `-m` to also create a related repository model.

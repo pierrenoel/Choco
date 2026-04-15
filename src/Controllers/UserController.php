@@ -35,6 +35,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $this->csrf();
         $user = new User();
 
         $user->setName($request->post("name"));
@@ -83,11 +84,11 @@ class UserController extends Controller
         $user = new User();
 
         $user->setName($request->post("name"));
-        $user->setMail($request->post("email"));
+        $user->setEmail($request->post("email"));
 
         $this->userRepository->update([
             "name" => $user->getName(),
-            "email" => $user->getMail()
+            "email" => $user->getEmail()
         ],$id);
 
         redirect("/");

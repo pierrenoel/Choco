@@ -73,10 +73,13 @@ abstract class Controller
         return \ob_get_clean();
     }
 
-    protected function validate($object)
+    protected function csrf()
     {
         if($_SESSION["token_csrf"] !== $_POST["csrf"]) $this->redirect("/not-found",404);
+    }
 
+    protected function validate($object)
+    {
         $reflection = new \ReflectionClass($object);
         $name = $reflection->getShortName();
         

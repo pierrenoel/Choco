@@ -33,7 +33,7 @@ class ControllerCommand extends Command
         $file = "src/Controllers/{$name}.php";
 
         if(\file_exists($file)){
-            $io->error("This file already exsits");
+            $io->error("Controller already exsits");
             return Command::FAILURE;
         }
         else {

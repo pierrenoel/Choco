@@ -1,10 +1,10 @@
 <?php 
 
 namespace Choco\Entities;
-use Choco\Core\Attributes\AutoIncrement;
-use Choco\Core\Attributes\Column;
-use Choco\Core\Attributes\Id;
-use Choco\Core\Attributes\Table;
+use Choco\Core\Attributes\Database\AutoIncrement;
+use Choco\Core\Attributes\Database\Column;
+use Choco\Core\Attributes\Database\Id;
+use Choco\Core\Attributes\Database\Table;
 
 #[Table('posts')]
 class Post 

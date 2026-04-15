@@ -35,16 +35,29 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $this->csrf();
-
         $user = new User();
 
         $user->setName($request->post("name"));
-        $user->setMail($request->post("email"));
+        $user->setEmail($request->post("email"));
+
+        $errors = $this->validate($user);
+        
+        if (!empty($errors)) {
+
+            $_SESSION["errors"] = $errors;
+            $_SESSION["old"] = $_POST;
+
+            echo $this->view("user/create", [
+                "title" => "Nouvel utilisateur",
+                "errors" => $errors
+            ]);
+
+            return;
+        }
 
         $this->userRepository->create([
             "name" => $user->getName(),
-            "email" => $user->getMail()
+            "email" => $user->getEmail()
         ]);
 
         redirect("/");

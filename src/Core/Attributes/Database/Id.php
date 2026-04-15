@@ -1,7 +1,7 @@
 <?php 
 
-namespace Choco\Core\Attributes;
+namespace Choco\Core\Attributes\Database;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class AutoIncrement {}
+class Id {}

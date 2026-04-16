@@ -10,12 +10,14 @@ class BaseRepository extends Repository
         parent::__construct();
     }
 
-    public function generateDatabase(array $file)
+    public function generateDatabase($file)
     {
-        foreach($file as $line){
-            $sql = $line;
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-        }
+        $file = file_get_contents($file);
+
+        $explode = explode("\n",$file);
+        $sql = implode(" ",$explode);
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
     }
 }

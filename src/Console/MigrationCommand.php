@@ -44,14 +44,20 @@ class MigrationCommand extends Command
     private function generateSQL(array $array) : array 
     {
         $tableSQL = [];
+        $fkSQL = [];
 
         foreach($array as $item)
         {
             $migrationService = new MigrationService($item);
-            $tableSQL[$item] = $migrationService->createTable();
+            $tableSQL[] = $migrationService->createTable();
+            $fk = $migrationService->foreignKey();
+            if(!empty($fk)) $fkSQL[] = $fk;
         }
 
-        return $tableSQL;
+        return [
+            "sql" => $tableSQL,
+            "fksql" => $fkSQL
+        ];
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) : int
@@ -62,6 +68,10 @@ class MigrationCommand extends Command
         $entities = $this->readEntities();
         $sql = $this->generateSQL($entities);
 
+        $mergedArray = array_merge($sql["sql"],$sql["fksql"]);
+
+        dd($mergedArray);
+
         $root = dirname(__DIR__, 2);
         $path = $root . "/migrations/database.sql";
 
@@ -70,12 +80,8 @@ class MigrationCommand extends Command
             return Command::FAILURE;
         }
         
-        $file = \file_put_contents($path,implode("\n\n",$sql));
-    
-        // Executer le fichier sql
-        $baseRespository = new BaseRepository();
-        $baseRespository->generateDatabase(explode("\n\n",\file_get_contents($path)));
-        
+        $file = \file_put_contents($path,implode("\n",$mergedArray));
+          
         return Command::SUCCESS;
     }
 }

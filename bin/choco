@@ -14,5 +14,6 @@ $app->add(new Choco\Console\ServeCommand());
 $app->add(new Choco\Console\ControllerCommand());
 $app->add(new Choco\Console\MigrationCommand());
 $app->add(new Choco\Console\EntityCommand());
+$app->add(new Choco\Console\MigrateCommand());
 
 $app->run();

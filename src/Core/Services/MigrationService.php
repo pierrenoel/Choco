@@ -4,6 +4,7 @@ namespace Choco\Core\Services;
 
 use Choco\Core\Attributes\Database\AutoIncrement;
 use Choco\Core\Attributes\Database\Column;
+use Choco\Core\Attributes\Database\ForeignKey;
 use Choco\Core\Attributes\Database\Id;
 use Choco\Core\Attributes\Database\Table;
 
@@ -51,7 +52,6 @@ class MigrationService
                     "nullable" => $field->nullable,
                     "default" => $field->default,
                     "unique" => $field->unique,
-                    "name" => $field->name,
                 ];
             }
 
@@ -66,10 +66,29 @@ class MigrationService
             foreach ($autoIncrement as $item) {
                 $this->result[$name]["autoIncrement"] = true;
             }
-        }
 
-        return $this->result;
+            // ForeignKey
+            $foreignKey = $property->getAttributes(ForeignKey::class);
+            foreach($foreignKey as $item){
+                
+                $key = $foreignKey[0]->newInstance();
+                
+                $entity = new \ReflectionClass($key->entity);
+                $entityName = \strtolower($entity->getShortName());
+                $table = $entity->getAttributes(Table::class);
+
+                $table = $table[0]->newInstance()->name ?? null;
+                
+                $this->result[$name]["constraint"] = "fk_{$entityName}";
+                $this->result[$name]["fk"] = $property->getName();
+                $this->result[$name]["references"] = $table;
+                $this->result[$name]["onDelete"] = \strtoupper($key->onDelete);
+                $this->result[$name]["onUpdate"] = \strtoupper($key->onUpdate);
+            }
+        }
+         return $this->result;
     }
+    
 
     public function createTable()
     {
@@ -80,38 +99,47 @@ class MigrationService
         foreach($attributes as $name => $attribute){
             $sql .= $name . " " . strtoupper($attribute["type"]);
 
-            if (isset($attribute["length"])) {
-                $sql .= "(" . $attribute["length"] . ")";
-            }
+            if (isset($attribute["length"])) $sql .= "(" . $attribute["length"] . ")";
+            
+            if (isset($attribute["nullable"]) && !$attribute["nullable"]) $sql .= " NOT NULL";
+            else $sql .= " NULL";
 
-            if (isset($attribute["nullable"]) && !$attribute["nullable"]) {
-                $sql .= " NOT NULL";
-            }
-
-            if (isset($attribute["default"])) {
-                $sql .= " DEFAULT '" . $attribute["default"] . "'";
-            }
-
-            if (isset($attribute["unique"]) && $attribute["unique"]) {
-                $sql .= " UNIQUE";
-            }
-
-            if (isset($attribute["primaryKey"]) && $attribute["primaryKey"]) {
-                $sql .= " PRIMARY KEY";
-            }
-
-            if (isset($attribute["autoIncrement"]) && $attribute["autoIncrement"]) {
-                $sql .= " AUTO_INCREMENT";
-            }
-
+            if (isset($attribute["default"])) $sql .= " DEFAULT '" . $attribute["default"] . "'";
+        
+            if (isset($attribute["unique"]) && $attribute["unique"]) $sql .= " UNIQUE";
+            
+            if (isset($attribute["primaryKey"]) && $attribute["primaryKey"]) $sql .= " PRIMARY KEY";
+            
+            if (isset($attribute["autoIncrement"]) && $attribute["autoIncrement"]) $sql .= " AUTO_INCREMENT";
+        
             $sql .= ", ";
         }
-
-        // Remove the last comma and space
         $sql = rtrim($sql, ", ") . ") ENGINE=InnoDB;";
-
         return $sql;
     }
 
+    public function foreignKey(): string
+    {
+        $attributes = $this->getAttributes();
+        $sqlParts = [];
+
+        foreach ($attributes as $attribute) {
+
+            if (!isset($attribute["constraint"], $attribute["fk"], $attribute["references"])) continue;
+            
+            $sql = "ALTER TABLE {$this->tableName} "
+                . "ADD CONSTRAINT {$attribute["constraint"]} "
+                . "FOREIGN KEY ({$attribute["fk"]}) "
+                . "REFERENCES {$attribute["references"]}";
+
+            if (!empty($attribute["onDelete"])) $sql .= " ON DELETE " . $attribute["onDelete"];
+        
+            if (!empty($attribute["onUpdate"])) $sql .= " ON UPDATE " . $attribute["onUpdate"];
+        
+            $sqlParts[] = $sql . ";";
+        }
+
+        return implode("\n", $sqlParts);
+    }
 }
 

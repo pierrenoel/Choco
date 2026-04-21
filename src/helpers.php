@@ -22,3 +22,22 @@ function redirect(string $url, int $status = 200)
     http_response_code($status);
     header("location: {$url}");
 }
+
+function readEntities(){
+    $result = [];
+
+    $path = __DIR__ . "/Entities";
+    $files = scandir($path);
+
+    $entities = array_filter($files, fn($item) => $item !== "." && $item !== "..");
+
+    foreach ($entities as $item) {
+        $class = 'Choco\\Entities\\' . pathinfo($item, PATHINFO_FILENAME);
+
+        if (class_exists($class)) {
+            $result[] = $class;
+        }
+    }
+
+    return $result;
+}

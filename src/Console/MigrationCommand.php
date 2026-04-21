@@ -2,9 +2,8 @@
 
 namespace Choco\Console;
 
-use Choco\Core\Repositories\BaseRepository;
 use Choco\Core\Services\MigrationService;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command; 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -58,6 +57,7 @@ class MigrationCommand extends Command
             "sql" => $tableSQL,
             "fksql" => $fkSQL
         ];
+
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) : int
@@ -69,8 +69,6 @@ class MigrationCommand extends Command
         $sql = $this->generateSQL($entities);
 
         $mergedArray = array_merge($sql["sql"],$sql["fksql"]);
-
-        dd($mergedArray);
 
         $root = dirname(__DIR__, 2);
         $path = $root . "/migrations/database.sql";

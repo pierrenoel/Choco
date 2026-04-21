@@ -7,6 +7,8 @@ use Choco\Core\Attributes\Database\Column;
 use Choco\Core\Attributes\Database\ForeignKey;
 use Choco\Core\Attributes\Database\Id;
 use Choco\Core\Attributes\Database\Table;
+use Choco\Core\Attributes\Relation\ManyToOne;
+use Choco\Core\Attributes\Relation\OneToOne;
 
 class MigrationService
 {
@@ -16,6 +18,7 @@ class MigrationService
     public function __construct(
         public $entity
     ){}
+
 
     public function getAttributes()
     {
@@ -32,10 +35,13 @@ class MigrationService
 
         $properties = $reflection->getProperties();
 
-        foreach($properties as $property){
+           foreach($properties as $property){
 
             $name = $property->getName();
 
+            // Relation (inner join)
+            if ($this->isRelation($property)) continue;
+            
             if (!isset($this->result[$name])) {
                 $this->result[$name] = [];
             }
@@ -97,7 +103,7 @@ class MigrationService
         $sql = "CREATE TABLE IF NOT EXISTS " . $this->tableName . " (";
 
         foreach($attributes as $name => $attribute){
-            $sql .= $name . " " . strtoupper($attribute["type"]);
+            $sql .= $name . " " . strtoupper($attribute["type"] ?? '');
 
             if (isset($attribute["length"])) $sql .= "(" . $attribute["length"] . ")";
             
@@ -130,7 +136,7 @@ class MigrationService
             $sql = "ALTER TABLE {$this->tableName} "
                 . "ADD CONSTRAINT {$attribute["constraint"]} "
                 . "FOREIGN KEY ({$attribute["fk"]}) "
-                . "REFERENCES {$attribute["references"]}";
+                . "REFERENCES {$attribute["references"]}(id)";
 
             if (!empty($attribute["onDelete"])) $sql .= " ON DELETE " . $attribute["onDelete"];
         
@@ -140,6 +146,13 @@ class MigrationService
         }
 
         return implode("\n", $sqlParts);
+    }
+
+    private function isRelation(\ReflectionProperty $property): bool
+    {
+        return 
+            $property->getAttributes(ManyToOne::class) ||
+            $property->getAttributes(OneToOne::class);
     }
 }
 

@@ -2,12 +2,16 @@
 
 namespace Choco\Core;
 
+use Choco\Core\Services\Entity\EntityService;
+
 abstract class Repository 
 {
     protected \PDO $pdo;
+    protected EntityService $entityService;
 
     public function __construct(){
         $this->connect();
+        $this->entityService = new EntityService();
     }
 
     private function connect(): void
@@ -21,47 +25,40 @@ abstract class Repository
             $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         } catch (\PDOException $e) {
-            die("Erreur PDO : " . $e->getMessage());
+            throw new \Exception("Erreur PDO {$e->getMessage()}");
         }
     }
 
-    private function getTableName() : string 
+    private function getAttribute(string $table) : string 
     {
         $rc = new \ReflectionClass($this);
 
-        if (!$rc->hasProperty("table")) {
-            throw new \Exception("La propriété 'table' est manquante.");
+        if (!$rc->hasProperty($table)) {
+            throw new \Exception("La propriété {$table} est manquante.");
         }
 
-        $property = $rc->getProperty("table");
+        $property = $rc->getProperty($table);
         $property->setAccessible(true);
 
         return $property->getValue($this);
     }
 
     public function all(): array
-    {
-        try {
-            $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()}");
-            $stmt->execute();
-
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        } catch (\PDOException $e) {
-            echo "Error {$e->getMessage()}";
-            return [];
-        }
+    {   
+        return $this->entityService->getRelatedTables($this->getAttribute("table")) 
+        ? $this->innerJoin() 
+        : $this->allMethod();
     }
 
     public function find(int $id) : mixed
     {
         try{
-            $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE id = :id");
+            $stmt = $this->pdo->prepare("SELECT * FROM {$this->getAttribute("table")} WHERE id = :id");
             $stmt->execute(["id" => $id]);
 
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            return $result ?: null;
+            return $result ?: null; 
     
         }catch(\PDOException $e){
             echo "Error {$e->getMessage()}";
@@ -76,7 +73,7 @@ abstract class Repository
         $explodeKeysWithDoubleDots = implode(",",array_map(fn($item) => ":{$item}",$keys));
 
         try{
-            $sql = "INSERT INTO {$this->getTableName()} ({$explodedKeys}) VALUES ({$explodeKeysWithDoubleDots})";
+            $sql = "INSERT INTO {$this->getAttribute("table")} ({$explodedKeys}) VALUES ({$explodeKeysWithDoubleDots})";
 
             $stmt = $this->pdo->prepare($sql);
 
@@ -96,7 +93,7 @@ abstract class Repository
         $values = implode(",",\array_values($array));
 
         try{
-            $sql = "UPDATE {$this->getTableName()} SET {$KeysUpdated} WHERE id = {$id}";
+            $sql = "UPDATE {$this->getAttribute("table")} SET {$KeysUpdated} WHERE id = {$id}";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute(explode(",",$values));
         }catch(\PDOException $e){
@@ -111,11 +108,67 @@ abstract class Repository
         if(!$result) throw new \Exception("Record with id {$id} not found");
 
         try{
-            $stmt = $this->pdo->prepare("DELETE FROM {$this->getTableName()} WHERE id = :id");
+            $stmt = $this->pdo->prepare("DELETE FROM {$this->getAttribute("table")} WHERE id = :id");
             $stmt->execute(["id" => $id]);
             return true;
         }
         catch(\PDOException $e){
+            echo "Error {$e->getMessage()}";
+            return false;
+        }
+    }
+
+    private function allMethod()
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM {$this->getAttribute("table")}");
+            
+            $stmt->execute();
+
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        } catch (\PDOException $e) {
+            echo "Error {$e->getMessage()}";
+            return [];
+        }
+    }
+
+    private function innerJoin()
+    {
+        $entity = $this->getAttribute("entity"); // Post
+        $table = $this->getAttribute("table"); // Posts
+
+        // Called Entity
+        $entityAlias = \strtolower($entity);
+        $currentEntity = $this->entityService->getQualifiedColumns($entity, $entityAlias);
+
+        // Related Table(s)
+        $relationProjections = [];
+        $related = $this->entityService->getRelatedTables($table);
+  
+        foreach($related as $key => $value){
+            $alias = $this->entityService->getTableNameFromClass($value);
+            $relationProjections[$this->entityService->getTableNameFromClass($value)]["alias"] = $key;
+            $relationProjections[$this->entityService->getTableNameFromClass($value)]["select"] = $this->entityService->getQualifiedColumns($key,$alias);
+        }
+    
+        $columns = trim(array_reduce($relationProjections,fn($acc,$item) => $acc .= $item["select"]. ", "),"");
+        $columns = \mb_substr($columns,0,-2);
+
+        $inners = "";
+        foreach($relationProjections as $key => $value){
+            $inners .= "INNER JOIN {$key} ON {$entityAlias}.{$value["alias"]}_id = {$key}.id ";
+        }
+
+        $sql = "SELECT {$currentEntity}, {$columns} FROM {$table} {$entityAlias} $inners";
+          
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return $this->entityService->hydrate($rows); 
+
+        } catch (\PDOException $e) {
             echo "Error {$e->getMessage()}";
             return false;
         }

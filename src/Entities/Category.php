@@ -1,0 +1,20 @@
+<?php
+
+namespace Choco\Entities;
+
+use Choco\Core\Attributes\Database\Column;
+use Choco\Core\Attributes\Database\Id;
+use Choco\Core\Attributes\Database\Table;
+use Choco\Core\Attributes\Database\AutoIncrement;
+
+#[Table("categories")]
+class Category 
+{
+    #[Column(type:"int")]
+    #[Id()]
+    #[AutoIncrement()]
+    protected int $id;
+
+    #[Column(type: 'varchar', length: 50, nullable: false)]
+    protected string $name;
+}
